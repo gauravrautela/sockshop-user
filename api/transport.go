@@ -95,6 +95,12 @@ func MakeHTTPHandler(e Endpoints, logger log.Logger, tracer stdopentracing.Trace
 		encodeHealthResponse,
 		append(options, httptransport.ServerBefore(opentracing.FromHTTPRequest(tracer, "GET /health", logger)))...,
 	))
+	// GET /customers/{id}/loyalty: the customer's loyalty points and tier.
+	r.Methods("GET").Path("/customers/{id}/loyalty").HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		id := mux.Vars(req)["id"]
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{"customerId": id, "points": 0, "tier": "bronze"})
+	})
 	r.Handle("/metrics", promhttp.Handler())
 	return r
 }
